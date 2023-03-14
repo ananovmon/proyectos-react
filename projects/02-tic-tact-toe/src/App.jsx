@@ -96,6 +96,7 @@ function App() {
      }
 
   }
+  
 
   return (
     <main className='board'>
@@ -126,6 +127,23 @@ function App() {
         {TURNS.O}
       </Square>
     </section>
+
+
+
+    {
+      winner ===! null && (
+         
+    <section className='winner'>
+      <div className='text'>
+        <h2> {winner === false ? 'Empate' : 'Ganó:'}</h2>
+
+        <header className='win'>
+          {winner && <Square>{winner}</Square>}
+        </header>
+      </div>
+    </section>
+      )
+    }
 
     </main>
   )
