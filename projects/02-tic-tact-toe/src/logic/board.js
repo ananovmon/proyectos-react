@@ -7,7 +7,7 @@
 
       if(boardToCheck[a] &&
         boardToCheck[a] === boardToCheck[b] &&
-        boardToCheck[b] === boardToCheck[c])
+        boardToCheck[a] === boardToCheck[c])
         {
           return boardToCheck[a]
         } 

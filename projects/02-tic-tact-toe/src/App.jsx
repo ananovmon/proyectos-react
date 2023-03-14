@@ -5,15 +5,27 @@ import { Square } from './components/Square.jsx'
 import { TURNS } from './constants.js'
 import { checkWinnerFrom, checkEndGame } from './logic/board'
 import { WinnerModal } from './components/WinnerModal.jsx'
+import { saveGameToStorage, resetGameStorage } from './logic/storage'
 
 function App() {
 
   //Estados del juego.
 
   //El estado que inicializa el tablero (primero como un array de 9 casillas vacío) y que se irá actualizando 
-  const [board, setBoard] = useState(Array(9).fill(null))
+  const [board, setBoard] = useState(()=>{
+    const boardFromStorage = window.localStorage.getItem('board')
 
-  const [turn, setTurn] = useState(TURNS.X)
+    return boardFromStorage
+    ? JSON.parse(boardFromStorage)
+    : Array(9).fill(null)
+  })
+
+  const [turn, setTurn] = useState( () => {
+    const turnFromStorage = window.localStorage.getItem('turn')
+
+    //?? mira si lo primero es null o undefined
+    return turnFromStorage ?? TURNS.X
+  })
 
   // null significa que no hay ganador (lo inicializamos así)
   // false significa que hay un empate
@@ -25,6 +37,8 @@ function App() {
     setBoard(Array(9).fill(null))
     setTurn(TURNS.X)
     setWinner(null)
+
+    resetGameStorage()
 
   }
 
@@ -46,6 +60,11 @@ function App() {
      const newTurn = turn === TURNS.X ? TURNS.O : TURNS.X
      setTurn(newTurn)
 
+      saveGameToStorage({
+      board: newBoard,
+      turn: newTurn
+    })
+
      //Cuando actualizamos el tablero, revisamos si tenemos ganador
      const newWinner = checkWinnerFrom(newBoard)
 
@@ -62,6 +81,7 @@ function App() {
   return (
     <main className='board'>
     <h1>Tic tac toe</h1>
+    <button onClick={resetGame}>Reset del juego</button>
 
     <section className='game'>
       {
