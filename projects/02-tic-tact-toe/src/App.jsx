@@ -1,43 +1,10 @@
 import { useState } from 'react'
 import './App.css'
-
-const TURNS = {
-  X: 'x',
-  O: 'o'
-}
-
-//Todas las posibles combinaciones que hacen ganar a uno de los dos jugadores
-const WINNER_COMBOS = [
-  [0,1,2],
-  [3,4,5],
-  [6,7,8],
-  [0,3,6],
-  [1,4,7],
-  [2,5,8],
-  [0,4,8],
-  [2,4,6]
-]
-
-
-
-const Square = ({ children, isSelected, updateBoard, index }) => {
-
-  const className = `square ${isSelected ? 'is-selected': '' }`
-
-  //En esta función se pasa el index en updateBoard para saber en qué cuadrado se ha pulsado
-  const handleClick = () => {
-    updateBoard(index)
-  }
-
-  // Esto es cada cuadrado. Si pulsamos en uno de ellos se ejecuta la función handleClick
-  return(
-    <div onClick={handleClick} className={className}>
-      {children}
-    </div>
-
-  )
-} 
-
+import confetti from 'canvas-confetti'
+import { Square } from './components/Square.jsx'
+import { TURNS } from './constants.js'
+import { checkWinnerFrom, checkEndGame } from './logic/board'
+import { WinnerModal } from './components/WinnerModal.jsx'
 
 function App() {
 
@@ -53,21 +20,12 @@ function App() {
 
   const[winner, setWinner] = useState(null) 
 
-  //Función para comprobar si hay ganador pasándole un tablero concreto. Devuelve el ganador (x u o) o null
-  const checkWinner = (boardToCheck) => {
-    for (const combo of WINNER_COMBOS){
-      const [a,b,c] = combo
 
-      if(boardToCheck[a] &&
-        boardToCheck[a] === boardToCheck[b] &&
-        boardToCheck[b] === boardToCheck[c])
-        {
-          return boardToCheck[a]
-        } 
-    }
+  const resetGame = () =>{
+    setBoard(Array(9).fill(null))
+    setTurn(TURNS.X)
+    setWinner(null)
 
-    //Si no tenemos ganador
-    return null
   }
 
   //Función que actualiza los cuadrados del tablero en base a un índice
@@ -89,10 +47,13 @@ function App() {
      setTurn(newTurn)
 
      //Cuando actualizamos el tablero, revisamos si tenemos ganador
-     const newWinner = checkWinner(newBoard)
+     const newWinner = checkWinnerFrom(newBoard)
 
      if(newWinner){
+      //confetti()
       setWinner(newWinner)
+     } else if(checkEndGame(newBoard)){
+      setWinner(false)
      }
 
   }
@@ -104,13 +65,13 @@ function App() {
 
     <section className='game'>
       {
-        board.map((_,index) =>{
+        board.map((square,index) =>{
           return(
             <Square key={index} 
                     index={index}
                     updateBoard={updateBoard}>
 
-              {board[index]}
+              {square}
 
             </Square>
           )
@@ -128,23 +89,7 @@ function App() {
       </Square>
     </section>
 
-
-
-    {
-      winner ===! null && (
-         
-    <section className='winner'>
-      <div className='text'>
-        <h2> {winner === false ? 'Empate' : 'Ganó:'}</h2>
-
-        <header className='win'>
-          {winner && <Square>{winner}</Square>}
-        </header>
-      </div>
-    </section>
-      )
-    }
-
+    <WinnerModal resetGame={resetGame} winner={winner}></WinnerModal>
     </main>
   )
 }
